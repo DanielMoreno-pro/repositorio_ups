@@ -7,6 +7,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import BusinessIcon from '@material-ui/icons/Business';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import axios from "axios";
 
 
 import {
@@ -18,17 +19,15 @@ import {
     ListItemIcon
   } from "@material-ui/core";
 
-  var  areasArrway = ["Edificio 1",
-  "Edificio 2",
-  "Edificio 3",
-  "Jardin"]
+  var  areasArrway = []
 
 
 class Areas extends Component {
     constructor(props) {
         super(props);   
         this.state = {
-            areas: areasArrway,
+            newState: false,
+            areasA: areasArrway,
             edit:false,
             idArea:0,
 
@@ -42,26 +41,46 @@ class Areas extends Component {
 
 
   frmNomArea = React.createRef();
+  frmPiso = React.createRef();
   
 
   addArea = event => {
-    event.preventDefault();
+    //event.preventDefault();
     
     var newArea = this.state;
+    
+    const data = {
+        area: this.frmNomArea.value,
+        piso: this.frmPiso.value
+    };
 
 
     if(!this.state.edit) {
-        newArea.areas.push(this.frmNomArea.value);
-        newArea.areas.sort();    
+        const url = 'http://localhost:5001/api/areas/';
+        axios.post(url,data).then(res => console.log(res.data));
+       // newArea.areas.push(this.frmNomArea.value);
+        //newArea.areas.sort();    
+        this.frmNomArea.value = "";
+        this.frmNomArea.focus();
+        this.frmPiso.value = "";
     }
     else {
-        newArea.areas[this.state.id] = this.frmNomArea.value;
-        newArea.edit = false;
-        newArea.id = 0;
+        const url ='http://localhost:5001/api/areas/'+this.state.id;
+        axios.put(url,data).then(res => console.log(res.data));
+
+        this.frmNomArea.value = "";
+        this.frmNomArea.focus();
+
+        this.frmPiso.value = "";
+
+      // newArea.areas[this.state.id] = this.frmNomArea.value;
+      // newArea.edit = false;
+       // newArea.id = 0;
     }
    
 
     this.setState({newArea}); 
+    this.loadAreas();
   }
 
   viewArea = (id) => event => {
@@ -69,16 +88,14 @@ class Areas extends Component {
 
     this.frmNomArea.value = "";
     this.frmNomArea.focus();
-    this.frmNomArea.value = this.state.areas[id];
+
+    this.frmPiso.value = "";
+    //this.frmNomArea.value = this.state.areas[id];
   }
 
-  editArea = (id) => event => {
-    event.preventDefault();
-    console.log("Editar Area");
-    console.log(id);
-    
-    this.frmNomArea.focus();
-    this.frmNomArea.value = this.state.areas[id];
+  editArea = (id, row) => (event) => {
+    //console.log("Editar Area");
+    //console.log(id);
 
     var newState = this.state;
     newState.edit = true;
@@ -86,21 +103,50 @@ class Areas extends Component {
 
     this.setState(newState);
 
+    this.frmNomArea.focus();
+    this.frmNomArea.value = this.state.areasA[row].area;
+    this.frmPiso.value = this.state.areasA[row].piso;
+    this.loadAreas();
+
+    
+
   }
 
   deleteArea = (id) => event => {
-    event.preventDefault();
+    //event.preventDefault();
     console.log("Borrar area");
     console.log(id);
+
+    const url ='http://localhost:5001/api/areas/'+id;
+    axios.delete(url).then(res => console.log(res.data));
 
     this.frmNomArea.value = "";
     this.frmNomArea.focus();
 
-    delete this.state.areas[id];
+    this.frmPiso.value = "";
 
-    var newArea = this.state.areas;
-    this.setState({ area: newArea});
+    this.loadAreas();
+    console.log(url);
+  
+
   }
+
+  loadAreas()
+  {
+      axios.get('http://localhost:5001/api/areas')
+      .then (res => {
+        this.setState({areasA:res.data});
+        console.log(res.data);
+      })
+
+  }
+   
+  componentDidMount()
+  {
+    this.loadAreas();
+  }
+
+
 
     render() { 
         return ( 
@@ -117,11 +163,19 @@ class Areas extends Component {
                 </Link>
                 <form autoComplete="off" onSubmit={this.addArea}>    
                     <TextField
-                        label="Nombre"
+                        label="Area"
                         type="text"
                         margin="normal"
                         variant="outlined"
                         inputRef={e => (this.frmNomArea = e)}
+                    />
+                     &nbsp;&nbsp;&nbsp;
+                     <TextField
+                        label="Tipo"
+                        type="text"
+                        margin="normal"
+                        variant="outlined"
+                        inputRef={e => (this.frmPiso  = e)}
                     />
                     <Fab
                     color="primary"
@@ -138,17 +192,18 @@ class Areas extends Component {
                     component="nav"
                     subheader={<ListSubheader component="div">{ this.titulo }</ListSubheader>}
                     >
-                    {this.state.areas.map((area, index) => (
+                    {this.state.areasA.map((area, index) => (
                         <ListItem button key={index}>
                             <ListItemIcon onClick={this.viewArea(index)}>
                                 <BusinessIcon />
                             </ListItemIcon>
-                            <ListItemText inset primary={area} />
+                            <ListItemText inset primary={area.area} />
+                            <ListItemText inset primary={area.piso} />
                             
-                            <ListItemIcon onClick={this.editArea(index)}>
+                            <ListItemIcon onClick={this.editArea(area.id, index)}>
                                 <EditIcon />
                             </ListItemIcon>
-                            <ListItemIcon onClick={this.deleteArea(index)}>
+                            <ListItemIcon onClick={this.deleteArea(area.id)}>
                                 <DeleteIcon />
                             </ListItemIcon>
                         </ListItem>

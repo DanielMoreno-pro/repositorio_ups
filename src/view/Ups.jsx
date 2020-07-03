@@ -6,6 +6,7 @@ import AddIcon from "@material-ui/icons/Add";
 import BusinessIcon from '@material-ui/icons/Business';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import axios from "axios";
 
 
 import {
@@ -54,7 +55,7 @@ class Ups extends Component {
   
 
   addUps = event => {
-    event.preventDefault();
+   // event.preventDefault();
     
     var newUps = this.state;
     //var newNumSerie = this.state
@@ -69,8 +70,11 @@ class Ups extends Component {
     };
 
     if(!this.state.edit) {
-        newUps.ups.push(data);
-        newUps.ups.sort();
+
+        const url = 'http://localhost:5001/api/upss/';
+        axios.post(url,data).then(res => console.log(res.data));
+        //newUps.ups.push(data);
+        //newUps.ups.sort();
         
         this.frmModelUps.value = "";
         this.frmModelUps.focus();
@@ -80,36 +84,44 @@ class Ups extends Component {
         this.frmBaterias.value = "";
     }
     else {
-        newUps.ups[this.state.id] = data;
-        newUps.edit = false;
-        newUps.id = 0;
-        
+        const url ='http://localhost:5001/api/upss/'+this.state.id;
+        axios.put(url,data).then(res => console.log(res.data));
+        this.frmModelUps.value = "";
+        this.frmModelUps.focus();
+    
+        this.frmNumSerie.value = "";
+        this.frmStatus.value = "";
+        this.frmBaterias.value = "";
+
+
     }
-   
 
     this.setState({newUps}); 
+    this.loadUps();
   }
 
-  viewUps = (id) => event => {
+  viewUps = (row) => event => {
     event.preventDefault();
 
     this.frmModelUps.value = "";
     this.frmModelUps.focus();
-    this.frmModelUps.value = this.state.ups[id];
 
-    this.frmNumSerie.value= this.state.ups[id];
+
+    this.frmNumSerie.value = "";
     this.frmNumSerie.focus();
-
-    this.frmStatus.value= this.state.ups[id];
+    this.frmStatus.value = "";
+    this.frmStatus.focus();
+    this.frmBaterias.value = "";
     this.frmBaterias.focus();
+   
 
 
   }
 
   editUps = (id, row ) => (event) => {
-    event.preventDefault();
-    console.log("Editar Area");
-    console.log(id);
+    //event.preventDefault();
+   // console.log("Editar UPS");
+    //console.log(id);
 
     var newState = this.state;
     newState.edit = true;
@@ -122,6 +134,7 @@ class Ups extends Component {
     this.frmNumSerie.value = this.state.ups[row].NumSerie;
     this.frmStatus.value = this.state.ups[row].Status;
     this.frmBaterias.value = this.state.ups[row].Baterias;
+    this.loadUps();
   }
 
 
@@ -131,41 +144,44 @@ class Ups extends Component {
     console.log("Borrar ups");
     console.log(id);
 
+    const url ='http://localhost:5001/api/upss/'+id;
+    axios.delete(url).then(res => console.log(res.data));
+
     this.frmModelUps.value = "";
     this.frmModelUps.focus();
 
     this.frmNumSerie.value = "";
     this.frmStatus.value = "";
     this.frmBaterias.value = "";
-
-    
-    delete this.state.ups[id];
-
-    var newUps = this.state.ups;
-    this.setState({ area: newUps});
-  }
-/*
-  deleteUps = (id) => event => {
-    event.preventDefault();
-
-    const url ='http://localhost:5001/api/alumnos/'+id;
-
   
-    
-    this.loadAlumno();
+
+    this.loadUps();
     
     console.log(url);
-}  
 
-loadUps () {
+    //delete this.state.ups[id];
 
-    axios.get('http://localhost:5001/api/upss')
-    .then(res => {
-      //const emps = res.data;
-      this.setState({ Ups2: res.data });
-      console.log(res.data);
-    })
-*/
+    //var newUps = this.state.ups;
+    //this.setState({ area: newUps});
+
+    
+  }
+
+  loadUps()
+  {
+      axios.get('http://localhost:5001/api/upss')
+      .then (res => {
+        this.setState({ups:res.data});
+        console.log(res.data);
+      })
+
+  }
+   
+  componentDidMount()
+  {
+    this.loadUps();
+  }
+
 
     render() { 
         return ( 
@@ -240,11 +256,11 @@ loadUps () {
                             <ListItemText inset primary={ups.Baterias} />
                             
                             <ListItemIcon 
-                            onClick={this.editUps(index, index)}>
+                            onClick={this.editUps(ups.id, index)}>
                                 <EditIcon />
                                 
                             </ListItemIcon>
-                            <ListItemIcon onClick={this.deleteUps(index)}>
+                            <ListItemIcon onClick={this.deleteUps(ups.id)}>
                                 <DeleteIcon />
                             </ListItemIcon>
                         </ListItem>

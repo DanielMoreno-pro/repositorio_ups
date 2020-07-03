@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 import '../styles/header.css';
-import AreasView from '../view/Areas';
+import { } from "@material-ui/core";
+import TecnicoView from '../view/tecnico';
 import Header from './header';
 
 import Footer from './footer';
 
 
 
-class Areas extends Component{
+class tecnico extends Component{
 
 
     state = {  }
@@ -15,11 +16,11 @@ class Areas extends Component{
     render() { 
         return(
     <div>
-        <Header name="AREAS" />
-        <AreasView />
+        <Header name="UPS" />
+        <TecnicoView />
         <Footer />
     </div>
         );
     }
 }
-export default Areas;
+export default tecnico;

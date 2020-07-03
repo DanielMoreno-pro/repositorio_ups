@@ -72,3 +72,14 @@
   color:black 
 }
 
+.cedes{
+  color: blue;
+}
+.espacioSuperior{
+  border-top: indigo 7px solid;
+  padding-top:35px ;
+}
+
+h1 {
+  color: red;
+}

@@ -4,9 +4,10 @@ import '../styles/App.css';
 
 // Importar Componentes
 import Header from './header';
-import Areas from '../view/Areas';
+//import Areas from '../view/Areas';
 import Footer from './footer';
 import Inicio from '../view/Inicio';
+
 
 
 
